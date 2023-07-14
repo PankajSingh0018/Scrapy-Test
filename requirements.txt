@@ -1,0 +1,6 @@
+scrapy 
+pathlib
+pandas 
+numpy 
+pymongo
+
