@@ -1,5 +1,6 @@
 import scrapy
 from pathlib  import Path
+import pandas as pd 
 
 
 class BooksSpider(scrapy.Spider):
@@ -13,17 +14,12 @@ class BooksSpider(scrapy.Spider):
             "http://books.toscrape.com/catalogue/category/books/travel_2/index.html",
         ]
         for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse)
+            yield scrapy.Request(url=url, callback= self.parse)
 
     def parse(self, response):
         page = response.url.split("/")[-2]
         filename = f"Books-{page}.html"
-
-        # Saved the content as only files
-        # Path(filename).write_bytes(response.body)
         self.log(f"Saved file {filename}")
-        # a= response.css(".product_pod").get()
-        # print(a)
         details = []
         cards = response.css(".product_pod")
 
@@ -32,11 +28,11 @@ class BooksSpider(scrapy.Spider):
             print(title)
             
             image = card.css(".image_container img")
-            src= image.attrib['src']
+            src= image.attrib['src'].replace("../../../../media", "https://books.toscrape.com/media")
             print(src)
             
             link = card.css(".image_container a")
-            href = link.attrib['href']
+            href = link.attrib['href'].replace("../../../", "https://books.toscrape.com/catalogue/")
             print(href)
             rating = card.css(".star-rating").attrib['class']
             star_rating= rating.split(" ")[1]
@@ -54,7 +50,7 @@ class BooksSpider(scrapy.Spider):
                 })
         
         df=pd.DataFrame.from_dict(details)
-        df.to_csv('Scrapy.csv', index=None)
+        df.to_csv(f'Scrapy-{page}.csv', index=None)
 
             
     
